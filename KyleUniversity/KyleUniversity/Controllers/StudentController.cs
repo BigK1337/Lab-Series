@@ -15,8 +15,8 @@ namespace KyleUniversity.Controllers
     {
         private SchoolContext db = new SchoolContext();
 
-        // GET: /Student/
-        public ActionResult Index()
+        // GET: /Student/ 
+        public ViewResult Index()
         {
             return View(db.Students.ToList());
         }
