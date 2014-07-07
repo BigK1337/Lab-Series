@@ -3,6 +3,7 @@ using PagedList;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -22,44 +23,35 @@ namespace KyleUniversity.Controllers
             ViewBag.CurrentSort = sortOrder;
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewBag.DateSortParm = sortOrder == "Date" ? "date_desc" : "Date";
-
-            if (searchString != null)
+            if (searchString != null) 
             {
-                page = 1;
-            }
-            else
-            {
-                searchString = currentFilter;
-            }
-
+                page = 1; 
+            } 
+            else 
+                { searchString = currentFilter; }
             ViewBag.CurrentFilter = searchString;
-
-            var students = from s in db.Students
-                select s;
+            var students = from s in db.Students select s;
             if (!String.IsNullOrEmpty(searchString))
-            {
-                students = students.Where(s => s.LastName.ToUpper().Contains(searchString.ToUpper()) || s.FirstMidName.ToUpper().Contains(searchString.ToUpper()));
-            }
+                {
+                    students = students.Where(s => s.LastName.ToUpper().Contains(searchString.ToUpper()) || s.FirstMidName.ToUpper().Contains(searchString.ToUpper()));
+                }
             switch (sortOrder)
             {
                 case "name_desc":
-                    students = students.OrderByDescending(s => s.LastName);
-                    break;
+                students = students.OrderByDescending(s => s.LastName);
+                break;
                 case "Date":
-                    students = students.OrderBy(s => s.EnrollmentDate);
-                    break;
+                students = students.OrderBy(s => s.EnrollmentDate);
+                break;
                 case "date_desc":
-                    students = students.OrderByDescending(s => s.EnrollmentDate);
-                    break;
-                default:
-                    students = students.OrderBy(s => s.LastName);
-                    break;
+                students = students.OrderByDescending(s => s.EnrollmentDate);
+                break;
+                default: // Name ascending
+                students = students.OrderBy(s => s.LastName);
+                break;
             }
-
-            int pageSize = 3;
-            int pageNumber = (page ?? 1);
-            return View(students.ToPagedList(pageNumber, pageSize));
-        }
+            int pageSize = 3; int pageNumber = (page ?? 1); return View(students.ToPagedList(pageNumber, pageSize));
+    }
 
         // GET: /Student/Details/5
         public ActionResult Details(int? id)
@@ -98,7 +90,7 @@ namespace KyleUniversity.Controllers
                     return RedirectToAction("Index");
                 }
             }
-            catch (DataException)
+            catch (RetryLimitExceededException)
             {
                 ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system admin.");
             }
@@ -136,7 +128,7 @@ namespace KyleUniversity.Controllers
                     return RedirectToAction("Index");
                 }
             }
-            catch(DataException)
+            catch (RetryLimitExceededException)
             {
                 ModelState.AddModelError("", "Unable to save changes.  Try again or contact your system admin.");
             }
@@ -173,7 +165,7 @@ namespace KyleUniversity.Controllers
                 db.Students.Remove(student);
                 db.SaveChanges();
             }
-            catch (DataException)
+            catch (RetryLimitExceededException)
             {
                 return RedirectToAction("Delete", new { id = id, saveChangesError = true });
             }
