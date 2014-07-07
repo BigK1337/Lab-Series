@@ -30,7 +30,8 @@ namespace KyleUniversity.Controllers
             else 
                 { searchString = currentFilter; }
             ViewBag.CurrentFilter = searchString;
-            var students = from s in db.Students select s;
+            var students = from s in db.Students 
+                           select s;
             if (!String.IsNullOrEmpty(searchString))
                 {
                     students = students.Where(s => s.LastName.ToUpper().Contains(searchString.ToUpper()) || s.FirstMidName.ToUpper().Contains(searchString.ToUpper()));
